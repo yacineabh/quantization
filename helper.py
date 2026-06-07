@@ -105,6 +105,26 @@ def linear_quantization(r_tensor, n_bits, dtype=torch.int8):
 
 
 ############# From the previous lesson(s) of "Linear Quantization II"
+def linear_q_symmetric_per_channel(r_tensor, dim, dtype=torch.int8):
+    
+    output_dim = r_tensor.shape[dim]
+    # store the scales
+    scale = torch.zeros(output_dim)
+
+    for index in range(output_dim):
+        sub_tensor = r_tensor.select(dim, index)
+        scale[index] = get_q_scale_symmetric(sub_tensor, dtype=dtype)
+
+    # reshape the scale
+    scale_shape = [1] * r_tensor.dim()
+    scale_shape[dim] = -1
+    scale = scale.view(scale_shape)
+    quantized_tensor = linear_q_with_scale_and_zero_point(
+        r_tensor, scale=scale, zero_point=0, dtype=dtype)
+   
+    return quantized_tensor, scale
+
+
 def get_q_scale_symmetric(tensor, dtype=torch.int8):
     r_max = tensor.abs().max().item()
     q_max = torch.iinfo(dtype).max
