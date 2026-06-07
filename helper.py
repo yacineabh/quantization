@@ -132,3 +132,14 @@ def get_q_scale_symmetric(tensor, dtype=torch.int8):
     # return the scale
     return r_max/q_max
 ###################################
+
+def linear_q_symmetric(tensor, dtype=torch.int8):
+    scale = get_q_scale_symmetric(tensor)
+    
+    quantized_tensor = linear_q_with_scale_and_zero_point(tensor,
+                                                     scale=scale,
+                   # in symmetric quantization zero point is = 0    
+                                                    zero_point=0,
+                                                      dtype=dtype)
+    
+    return quantized_tensor, scale
